@@ -1,45 +1,43 @@
 <?php
 
-namespace App\Telegram\Command;
+namespace App\Telegram\Commands;
 
-class BasicCommand extends BasicCommand
+use GuzzleHttp\Client;
+
+class BasicCommand
 {
-    // Til tanlash uchun klaviaturani yuborish
-    public function showLanguageOptions()
-    {
-        $keyboard = [
-            'keyboard' => [
-                [['text' => 'O‘zbekcha'], ['text' => 'English']]
-            ],
-            'resize_keyboard' => true,
-            'one_time_keyboard' => true,
-        ];
+    protected $chatId;
+    protected $token;
+    protected $name;
 
-        $this->sendKeyboard('Please choose a language:', $keyboard);
+    public function __construct($chatId, $name)
+    {
+        $this->chatId = $chatId;
+        $this->name = $name;
+        $this->token = env('TELEGRAM_BOT_TOKEN');
     }
 
-    // Klaviaturani yuborish funksiyasi
-    public function sendKeyboard($text, $keyboard)
+    // Umumiy xabar yuborish funksiyasi
+    public function sendMessage($text): void
     {
         $client = new Client();
         $client->post("https://api.telegram.org/bot{$this->token}/sendMessage", [
             'form_params' => [
                 'chat_id' => $this->chatId,
                 'text' => $text,
-                'reply_markup' => json_encode($keyboard),
             ]
         ]);
     }
 
-    // O‘zbek tilini tanlaganda
-    public function chooseUzbek()
+    // /start komandasini ko'rsatish
+    public function start(): void
     {
-        $this->sendMessage('Siz O‘zbek tilini tanladingiz!');
+        $this->sendMessage("{$this->name}, botga xush kelibsiz. Bot haqida ma'lumot olmoqchi bo'lsangiz /help ni bosing.");
     }
 
-    // Ingliz tilini tanlaganda
-    public function chooseEnglish()
+    // /help komandasini ko'rsatish
+    public function help(): void
     {
-        $this->sendMessage('You have selected English!');
+        $this->sendMessage('Bot sizning eslatmalaringiz sifatida xizmat qiladi.');
     }
 }
